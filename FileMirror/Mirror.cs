@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-
+﻿
 namespace FileMirror
 {
+    /// <summary>
+    /// Supplies the functionality to 'mirror' one folder tree to another.
+    /// </summary>
     internal class Mirror
     {
         private string folderA;
@@ -19,7 +15,7 @@ namespace FileMirror
         private List<string>? createdAndCheckedDirs;
 
         /// <summary>
-        /// Construictor
+        /// Constructor
         /// </summary>
         /// <param name="folderA"></param>
         /// <param name="folderB"></param>
@@ -94,23 +90,35 @@ namespace FileMirror
             //  For all files in dictionary X
             foreach (var key in filesX.Keys)
             {
+                //  Get from and to files
+                var fromFile = filesX[key];
+                var toFile = Path.Combine(folderY, key);
+
                 //  If the key exists in dictionary Y
                 if (filesY.ContainsKey(key))
                 {
                     // Check sizes; report error if different
+                    var fiX = new FileInfo(filesX[key]);
+                    var fiY = new FileInfo(filesY[key]);
+
+                    if (fiX.Length != fiY.Length)
+                    {
+                        Console.WriteLine(
+                            $"WARNING: file '{key}' has different size in each location ({fiX.Length} bytes vs {fiY.Length} bytes");
+                    }
+                    else
+                    {
+                        //  OK
+                        Console.WriteLine($"[{mode}] Present  : {toFile}");
+                        filesAlreadyCopied++;
+                    }
                 }
                 //  Otherwise copy file across
                 else
                 {
-                    //  Get from and to files
-                    var fromFile = filesX[key];
-                    var toFile = Path.Combine(folderY, key);
-
-                    //  And copy it
+                    //  Copy it
                     CopyFile(mode, fromFile, toFile);
-
                 }
-
             }
 
             return;
@@ -129,8 +137,7 @@ namespace FileMirror
 
             //  May need to create the output folder. Dir is null if it's the root dir.
             var dir = Path.GetDirectoryName(toFile);
-            if (dir != null)
-                Directory.CreateDirectory(dir);
+            CreateDirectory(dir);
 
             //  Copy the file
             //File.Copy(fromFile, toFile);
@@ -143,7 +150,8 @@ namespace FileMirror
         }
 
         /// <summary>
-        /// Implements
+        /// Ensures a directory exists and also puts it on a lookaside list so that
+        /// each dir is only checked once.
         /// </summary>
         /// <param name="dir"></param>
         private void CreateDirectory(string? dir)
@@ -156,7 +164,6 @@ namespace FileMirror
                     createdAndCheckedDirs.Add(dir);
                 }
             }
-
         }
     }
 }
