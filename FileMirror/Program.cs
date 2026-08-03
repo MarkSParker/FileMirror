@@ -46,7 +46,8 @@ try
     Console.WriteLine("nocopy:  " + nocopy.ToString());
 
     //  We're good, mirror the folders
-    (filesCopied, filesAlreadyCopied) = Mirror.MirrorTree(folderA, folderB, nolog, nocopy);
+    var mirror = new Mirror(folderA, folderB);
+    (filesCopied, filesAlreadyCopied) = mirror.MirrorTree(nolog, nocopy);
 
     //  Report
     Console.WriteLine("");
@@ -58,7 +59,7 @@ catch (ArgumentException ex)
 {
     if (ex.Message != string.Empty)
     {
-        Console.WriteLine(ex.Message);
+        Console.WriteLine($"ERROR: {ex.Message}");
     }
 
     ReportSyntax();
@@ -73,6 +74,7 @@ catch (Exception ex)
 //  Advises on correct command syntax
 static void ReportSyntax()
 {
+    Console.WriteLine("");
     Console.WriteLine("Command format is:-");
     Console.WriteLine("");
     Console.WriteLine("    FileMirror[/nologging][/nocopy] <folderA> <folderB>");

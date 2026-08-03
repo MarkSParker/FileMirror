@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FileMirror": {
+      "commandName": "Project",
+      "commandLineArgs": "/nocopy C:\\Temp\\FileMirror\\A C:\\Temp\\FileMirror\\B"
+    }
+  }
+}
