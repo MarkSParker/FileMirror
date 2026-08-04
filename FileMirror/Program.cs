@@ -28,22 +28,26 @@ var folderB = string.Empty;
 try
 {
 
-    //  Del me
+    //  Debug report command line
+#if DEBUG
     Console.WriteLine("");
     Console.WriteLine($"Args length: {args.Length}");
     foreach (var arg in args)
         Console.WriteLine($"Arg: {arg}");
     Console.WriteLine("");
+#endif
 
     //  Parse the command line
     (nolog, nocopy, folderA, folderB) = Parser.ParseCommandLine(args);
 
-    //  Del me
+    //  Debug report result of parsing
+#if DEBUG
     Console.WriteLine("");
     Console.WriteLine("folderA: " + folderA);
     Console.WriteLine("FolderB: " + folderB);
     Console.WriteLine("nolog:   " + nolog.ToString());
     Console.WriteLine("nocopy:  " + nocopy.ToString());
+#endif
 
     //  We're good, mirror the folders
     var mirror = new Mirror(folderA, folderB);

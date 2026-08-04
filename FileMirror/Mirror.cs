@@ -1,5 +1,4 @@
-﻿
-namespace FileMirror
+﻿namespace FileMirror
 {
     /// <summary>
     /// Supplies the functionality to 'mirror' one folder tree to another.
@@ -41,13 +40,6 @@ namespace FileMirror
             this.nolog = nolog;
             this.nocopy = nocopy;
 
-            //  Normalize the folders by appending a path separator if reqd
-            if (folderA[^1] != Path.DirectorySeparatorChar)
-                folderA = folderA + Path.DirectorySeparatorChar;
-
-            if (folderB[^1] != Path.DirectorySeparatorChar)
-                folderB = folderB + Path.DirectorySeparatorChar;
-
             //  Scan both folders recursively; put results in a dictionary for easy lookup
             var filesA = ScanTree(folderA);
             var filesB = ScanTree(folderB);
@@ -67,9 +59,19 @@ namespace FileMirror
         /// <returns></returns>
         private static Dictionary<string, string> ScanTree(string rootFolder)
         {
+            //  Scan the tree
             var filesDict = Directory
                 .GetFiles(rootFolder, "*", SearchOption.AllDirectories)
                 .ToDictionary(path => Path.GetRelativePath(rootFolder, path), path => path);
+
+            //  Debug report results of scan
+#if DEBUG
+            Console.WriteLine("");
+            Console.WriteLine("Result of scannng: " + rootFolder);
+            foreach (var key in filesDict.Keys)
+                Console.WriteLine(filesDict[key]);
+            Console.WriteLine("");
+#endif
 
             return filesDict;
         }
@@ -78,45 +80,43 @@ namespace FileMirror
         /// Copy all missing files from X to Y (which is either A to B or B to A.)
         /// </summary>
         /// <param name="mode">For reporting</param>
-        /// <param name="filesX">Copy files from this tree</param>
-        /// <param name="filesY">Copy files to this tree</param>
-        /// <param name="folderY">Use this folder to calc abs path of destination file</param>
+        /// <param name="filesFrom">Copy files from this tree</param>
+        /// <param name="filesTo">Copy files to this tree</param>
+        /// <param name="folderTo">Use this folder to calc abs path of destination file</param>
         private void PopulateTree(
-            string mode, Dictionary<string, string> filesX, Dictionary<string, string> filesY, string folderY)
+            string mode, Dictionary<string, string> filesFrom, Dictionary<string, string> filesTo, string folderTo)
         {
             //  Init empty directory lookaside list
             createdAndCheckedDirs = new();
 
-            //  For all files in dictionary X
-            foreach (var key in filesX.Keys)
+            //  For all files in src dictionary
+            foreach (var key in filesFrom.Keys)
             {
                 //  Get from and to files
-                var fromFile = filesX[key];
-                var toFile = Path.Combine(folderY, key);
+                var fromFile = filesFrom[key];
+                var toFile = Path.Combine(folderTo, key);
 
-                //  If the key exists in dictionary Y
-                if (filesY.ContainsKey(key))
+                //  If the key exists in dest dictionary
+                if (filesTo.ContainsKey(key))
                 {
-                    // Check sizes; report error if different
-                    var fiX = new FileInfo(fromFile);
-                    var fiY = new FileInfo(toFile);
+                    var fiFrom = new FileInfo(fromFile);
+                    var fiTo = new FileInfo(toFile);
 
-                    if (fiX.Length != fiY.Length)
+                    if (fiFrom.Length != fiTo.Length)
                     {
                         Console.WriteLine(
-                            $"WARNING: file '{key}' has different size in each location ({fiX.Length} bytes vs {fiY.Length} bytes");
+                            $"WARNING: file '{key}' has different size in each location ({fiFrom.Length} bytes vs {fiTo.Length} bytes)");
                     }
                     else
                     {
-                        //  OK
-                        Console.WriteLine($"[{mode}] Present  : {toFile}");
+                        if (!nolog)
+                            Console.WriteLine($"[{mode}] Present  : {toFile}");
                         filesAlreadyCopied++;
                     }
                 }
-                //  Otherwise copy file across
                 else
                 {
-                    //  Copy it
+                    // Otherwise copy file across
                     CopyFile(mode, fromFile, toFile);
                 }
             }
@@ -141,8 +141,8 @@ namespace FileMirror
             CreateDirectory(dir);
 
             //  Copy the file
-            //if (!nocopy)
-            //    File.Copy(fromFile, toFile);
+            if (!nocopy)
+                File.Copy(fromFile, toFile);
 
             //  Maintain stats
             filesCopied++;

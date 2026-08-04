@@ -42,6 +42,22 @@
             args[0] = args[0].Trim();
             args[1] = args[1].Trim();
 
+            //  Normalize the folders by appending a path separator if reqd
+            if (args[0][^1] != Path.DirectorySeparatorChar)
+                args[0] = args[0] + Path.DirectorySeparatorChar;
+
+            if (args[1][^1] != Path.DirectorySeparatorChar)
+                args[1] = args[1] + Path.DirectorySeparatorChar;
+
+            //  Debug report
+#if DEBUG
+            Console.WriteLine("");
+            Console.WriteLine("Normalized folders:");
+            Console.WriteLine("A: " + args[0]);
+            Console.WriteLine("B: " + args[1]);
+            Console.WriteLine("");
+#endif
+
             //  Check both are existing, rooted folders
             foreach (var folder in args)
             {
@@ -74,7 +90,7 @@
             if (args[0] == args[1])
                 throw new ArgumentException("Two different folders must be specified.");
 
-            //  Folders must not be one inside the other else maddness
+            //  Folders must not be one inside the other else maddness ensues
 
 
             //  Return the results of the parsing
