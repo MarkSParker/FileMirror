@@ -98,8 +98,8 @@ namespace FileMirror
                 if (filesY.ContainsKey(key))
                 {
                     // Check sizes; report error if different
-                    var fiX = new FileInfo(filesX[key]);
-                    var fiY = new FileInfo(filesY[key]);
+                    var fiX = new FileInfo(fromFile);
+                    var fiY = new FileInfo(toFile);
 
                     if (fiX.Length != fiY.Length)
                     {
@@ -133,14 +133,16 @@ namespace FileMirror
         private void CopyFile(string mode, string fromFile, string toFile)
         {
             //  Report
-            Console.WriteLine($"[{mode}] CopyingTo: {toFile}");
+            var action = nocopy ? "NotCopyTo" : "CopyingTo";
+            Console.WriteLine($"[{mode}] {action}: {toFile}");
 
             //  May need to create the output folder. Dir is null if it's the root dir.
             var dir = Path.GetDirectoryName(toFile);
             CreateDirectory(dir);
 
             //  Copy the file
-            //File.Copy(fromFile, toFile);
+            //if (!nocopy)
+            //    File.Copy(fromFile, toFile);
 
             //  Maintain stats
             filesCopied++;
@@ -160,7 +162,11 @@ namespace FileMirror
             {
                 if (!createdAndCheckedDirs!.Contains(dir))
                 {
-                    Directory.CreateDirectory(dir);
+                    if (!nocopy)
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+
                     createdAndCheckedDirs.Add(dir);
                 }
             }
