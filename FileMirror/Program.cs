@@ -70,7 +70,7 @@ catch (ArgumentException ex)
 }
 catch (Exception ex)
 {
-    Console.Error.WriteLine(ex.Message);
+    Console.Error.WriteLine("ERROR: " + ex.Message);
 }
 
 //  ReportSyntax

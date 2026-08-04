@@ -90,8 +90,12 @@
             if (args[0] == args[1])
                 throw new ArgumentException("Two different folders must be specified.");
 
-            //  Folders must not be one inside the other else maddness ensues
-
+            //  Folders must not be one inside the other else madness ensues
+            if (args[0].StartsWith(args[1], StringComparison.InvariantCultureIgnoreCase)
+                || args[1].StartsWith(args[0], StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new Exception("One folder must not be a subfolder of the other.");
+            }
 
             //  Return the results of the parsing
             return (nolog, nocopy, args[0], args[1]);
