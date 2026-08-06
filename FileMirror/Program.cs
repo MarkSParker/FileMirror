@@ -27,9 +27,8 @@ var folderB = string.Empty;
 
 try
 {
-
-    //  Debug report command line
 #if DEBUG
+    //  Debug report command line
     Console.WriteLine("");
     Console.WriteLine($"Args length: {args.Length}");
     foreach (var arg in args)
@@ -40,8 +39,8 @@ try
     //  Parse the command line
     (nolog, nocopy, folderA, folderB) = Parser.ParseCommandLine(args);
 
-    //  Debug report result of parsing
 #if DEBUG
+    //  Debug report result of parsing
     Console.WriteLine("");
     Console.WriteLine("folderA: " + folderA);
     Console.WriteLine("FolderB: " + folderB);
@@ -55,7 +54,11 @@ try
 
     //  Report
     Console.WriteLine("");
-    Console.WriteLine("Files copied:           " + filesCopied);
+    Console.WriteLine(
+        (nocopy
+        ? "Files not copied:       "
+        : "Files copied:           ")
+        + filesCopied);
     Console.WriteLine("Files already correct:  " + filesAlreadyCopied);
     Console.WriteLine("");
 }
@@ -81,7 +84,7 @@ static void ReportSyntax()
     Console.WriteLine("");
     Console.WriteLine("Command format is:-");
     Console.WriteLine("");
-    Console.WriteLine("    FileMirror[/nologging][/nocopy] <folderA> <folderB>");
+    Console.WriteLine("    FileMirror[/nolog][/nocopy] <folderA> <folderB>");
     Console.WriteLine("");
     Console.WriteLine(@"    Eg:    filemirror/nolog c:\FilesX d:\SavedFiles\FilesX");
     Console.WriteLine("");
@@ -90,6 +93,13 @@ static void ReportSyntax()
     Console.WriteLine("");
     Console.WriteLine("If the same files already exist in both locations with different sizes");
     Console.WriteLine("they are reported as warnings.");
+    Console.WriteLine("");
+    Console.WriteLine("/nolog means don't report existing files, only files copied");
+    Console.WriteLine("");
+    Console.WriteLine("/nocopy means don't actually make copies; only report files which");
+    Console.WriteLine("need to be copied.");
+    Console.WriteLine("");
+    Console.WriteLine("Only one of /nolog and /nocopy may be given.");
     Console.WriteLine("");
 
     return;

@@ -42,15 +42,22 @@
             args[0] = args[0].Trim();
             args[1] = args[1].Trim();
 
-            //  Normalize the folders by appending a path separator if reqd
+            //  Check not null or whitespace
+            if (string.IsNullOrWhiteSpace(args[0]))
+                throw new ArgumentException($"Folder 1 not given.");
+
+            if (string.IsNullOrWhiteSpace(args[1]))
+                throw new ArgumentException($"Folder 2 not given.");
+
+            //  Add a trailing slash
             if (args[0][^1] != Path.DirectorySeparatorChar)
                 args[0] = args[0] + Path.DirectorySeparatorChar;
 
             if (args[1][^1] != Path.DirectorySeparatorChar)
                 args[1] = args[1] + Path.DirectorySeparatorChar;
 
-            //  Debug report
 #if DEBUG
+            //  Debug report
             Console.WriteLine("");
             Console.WriteLine("Normalized folders:");
             Console.WriteLine("A: " + args[0]);
@@ -61,10 +68,6 @@
             //  Check both are existing, rooted folders
             foreach (var folder in args)
             {
-                //  Check not null
-                if (string.IsNullOrWhiteSpace(folder))
-                    throw new ArgumentException($"Folder not given.");
-
                 //  Must have min length of three, eg C:\
                 if (folder.Length < 3)
                     throw new ArgumentException($"Folder '{folder}' is too short to be a fully qualified folder.");
@@ -72,10 +75,6 @@
                 //  UNC not supported
                 if (folder.StartsWith(@"\\"))
                     throw new ArgumentException($"Folder '{folder}' UNC paths are not supported.");
-
-                //  Must not be raw device, eg C:
-                if (folder[folder.Length - 1] == ':')
-                    throw new ArgumentException($"Folder '{folder}' must not be a raw device.");
 
                 //  Check folder exists
                 if (!Directory.Exists(folder))
@@ -100,7 +99,5 @@
             //  Return the results of the parsing
             return (nolog, nocopy, args[0], args[1]);
         }
-
-
     }
 }

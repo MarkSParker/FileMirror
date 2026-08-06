@@ -64,8 +64,8 @@
                 .GetFiles(rootFolder, "*", SearchOption.AllDirectories)
                 .ToDictionary(path => Path.GetRelativePath(rootFolder, path), path => path);
 
-            //  Debug report results of scan
 #if DEBUG
+            //  Debug report results of scan
             Console.WriteLine("");
             Console.WriteLine("Result of scannng: " + rootFolder);
             foreach (var key in filesDict.Keys)
