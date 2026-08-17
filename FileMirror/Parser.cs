@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace FileMirror
+﻿namespace FileMirror
 {
     internal static class Parser
     {
