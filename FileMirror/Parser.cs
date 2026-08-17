@@ -1,11 +1,14 @@
-﻿namespace FileMirror
+﻿using System.ComponentModel;
+
+namespace FileMirror
 {
     internal static class Parser
     {
-        public static (bool, bool, string, string) ParseCommandLine(string[] args)
+        public static (bool, bool, bool, string, string) ParseCommandLine(string[] args)
         {
             var nolog = false;                                                  // don't report file copies/folder creations
             var nocopy = false;                                                 // don't create any files/folders; just say what would have been done
+            var bothways = false;                                               // Do A->B AND B->A, normally only A->B is done
 
             //  Check there are args
             if (args.Length < 2)
@@ -13,17 +16,49 @@
                 throw new ArgumentException("Insufficient arguments on command");
             }
 
-            //  Get flags
-            if (args[0].StartsWith('/'))
+            //  Where any arg contains a / convert into multiple args because these are flags
+            var newArgs = new List<string>();
+            foreach (var arg in args)
             {
-                switch (args[0])
+                if (arg.Contains('/'))
                 {
-                    case "/nolog":
+                    var flags = arg.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var flag in flags)
+                        newArgs.Add('/' + flag);
+
+                }
+                else
+                {
+                    newArgs.Add(arg);
+                }
+            }
+            args = newArgs.ToArray();
+
+#if DEBUG
+            //  Dump the args after flag separation
+            Console.WriteLine();
+            Console.WriteLine("Dump the args after flag separation");
+            for (int arg = 0; arg < args.Length; arg++)
+                Console.WriteLine($"arg {arg}: {args[arg]}");
+            Console.WriteLine();
+#endif
+
+            //  Process all leading flags starting with /
+            while (args[0].StartsWith('/'))
+            {
+                //  Process the flag
+                switch (args[0][..4])
+                {
+                    case "/nol":
                         nolog = true;
                         break;
 
-                    case "/nocopy":
+                    case "/noc":
                         nocopy = true;
+                        break;
+
+                    case "/bot":
+                        bothways = true;
                         break;
 
                     default:
@@ -32,7 +67,20 @@
 
                 // Discard the flag
                 args = args[1..];
+
+                // If we've run out of args, error
+                if (args.Length == 0)
+                    throw new ArgumentException("Too few arguments.");
             }
+
+#if DEBUG
+            //  Report flags
+            Console.WriteLine("");
+            Console.WriteLine($"/nolog:    {nolog}");
+            Console.WriteLine($"/nocopy:   {nocopy}");
+            Console.WriteLine($"/bothways: {bothways}");
+            Console.WriteLine("");
+#endif
 
             //  Ensure there are exactly two folders left on command line
             if (args.Length != 2)
@@ -97,7 +145,7 @@
             }
 
             //  Return the results of the parsing
-            return (nolog, nocopy, args[0], args[1]);
+            return (nolog, nocopy, bothways, args[0], args[1]);
         }
     }
 }

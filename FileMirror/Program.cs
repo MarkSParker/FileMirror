@@ -2,13 +2,13 @@
 //
 //  Given two folders as arguments, copies all the missing files from A to B
 //  and vice versa. Where there is a clash (same name, different size) the user
-//  is given a warning.
+//  is given a warning. Backcopy is optional.
 //
 //  Missing folders are created as required.
 //
 //  Command format:
 //
-//      FileMirror/nocopy/nolog A:\a B:\b
+//      FileMirror/nocopy/nolog/bothways A:\a B:\b
 //
 
 //  Stats
@@ -17,9 +17,10 @@ using FileMirror;
 var filesCopied = 0;
 var filesAlreadyCopied = 0;
 
-//  Flags (these are mutually exclusive)
+//  Flags
 var nolog = false;                                                              // don't report file copies/folder creations
 var nocopy = false;                                                             // don't create any files/folders; just say what would have been done
+var bothways = false;
 
 //  Folders to be mirrored. The order they are specified is irrelevant
 var folderA = string.Empty;
@@ -27,30 +28,12 @@ var folderB = string.Empty;
 
 try
 {
-#if DEBUG
-    //  Debug report command line
-    Console.WriteLine("");
-    Console.WriteLine($"Args length: {args.Length}");
-    foreach (var arg in args)
-        Console.WriteLine($"Arg: {arg}");
-    Console.WriteLine("");
-#endif
-
     //  Parse the command line
-    (nolog, nocopy, folderA, folderB) = Parser.ParseCommandLine(args);
+    (nolog, nocopy, bothways, folderA, folderB) = Parser.ParseCommandLine(args);
 
-#if DEBUG
-    //  Debug report result of parsing
-    Console.WriteLine("");
-    Console.WriteLine("folderA: " + folderA);
-    Console.WriteLine("FolderB: " + folderB);
-    Console.WriteLine("nolog:   " + nolog.ToString());
-    Console.WriteLine("nocopy:  " + nocopy.ToString());
-#endif
-
-    //  We're good, mirror the folders
+    //  Mirror the folders
     var mirror = new Mirror(folderA, folderB);
-    (filesCopied, filesAlreadyCopied) = mirror.MirrorTree(nolog, nocopy);
+    (filesCopied, filesAlreadyCopied) = mirror.MirrorTree(nolog, nocopy, bothways);
 
     //  Report
     Console.WriteLine("");
@@ -84,9 +67,9 @@ static void ReportSyntax()
     Console.WriteLine("");
     Console.WriteLine("Command format is:-");
     Console.WriteLine("");
-    Console.WriteLine("    FileMirror[/nolog][/nocopy] <folderA> <folderB>");
+    Console.WriteLine("    FileMirror[/nolog][/nocopy][/bothways] <folderA> <folderB>");
     Console.WriteLine("");
-    Console.WriteLine(@"    Eg:    filemirror/nolog c:\FilesX d:\SavedFiles\FilesX");
+    Console.WriteLine(@"    Eg:    filemirror/nolog c:\FolderA d:\SavedFiles\FolderB");
     Console.WriteLine("");
     Console.WriteLine("Missing files are replicated into both folder trees with subfolders");
     Console.WriteLine("being created as necessary. Both argument folders must already exist.");
@@ -99,7 +82,7 @@ static void ReportSyntax()
     Console.WriteLine("/nocopy means don't actually make copies; only report files which");
     Console.WriteLine("need to be copied.");
     Console.WriteLine("");
-    Console.WriteLine("Only one of /nolog and /nocopy may be given.");
+    Console.WriteLine("/bothways means copy A->B and B->A. By default only A->B is copied.");
     Console.WriteLine("");
 
     return;

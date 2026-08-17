@@ -30,7 +30,7 @@
         /// <param name="nolog">Don't report files seen, only files copied</param>
         /// <param name="nocopy">Don't copy any files; just report</param>
         /// <returns>Number of files copied; number of files already copied</returns>
-        public (int, int) MirrorTree(bool nolog = false, bool nocopy = false)
+        public (int, int) MirrorTree(bool nolog = false, bool nocopy = false, bool bothways = false)
         {
             //  Stats
             filesCopied = 0;
@@ -44,9 +44,12 @@
             var filesA = ScanTree(folderA);
             var filesB = ScanTree(folderB);
 
-            //  Populate A->B then B->A
+            //  Populate A->B
             PopulateTree("A->B", filesA, filesB, folderB);
-            PopulateTree("B->A", filesB, filesA, folderA);
+
+            //  Optionally B->A
+            if (bothways)
+                PopulateTree("B->A", filesB, filesA, folderA);
 
             //  Done
             return (filesCopied, filesAlreadyCopied);
